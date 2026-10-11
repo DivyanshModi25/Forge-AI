@@ -6,6 +6,8 @@ from langchain_openai import ChatOpenAI
 
 from app.tools.deployment_planner import DeploymentPlan
 
+from app.tools.langchain_tools import inspect_github_repository
+
 load_dotenv()
 
 model = ChatOpenAI(
@@ -51,25 +53,19 @@ def create_deployment_plan(inspection_report:dict) -> DeploymentPlan:
 
 
 if __name__ == "__main__":
-    sample_report = {
-        "repository": "example/flask-service",
-        "local_path": "workspace/example__flask-service",
-        "root_entries": [
-            "app.py",
-            "requirements.txt",
-            "tests",
-        ],
-        "manifests": [
-            {
-                "file": "requirements.txt",
-                "description": "Python dependencies",
-            }
-        ],
-        "important_files": [],
-        "github_workflows": [],
-        "has_tests_directory": True,
-        "has_dockerfile": False,
-    }
+    github_url = input("GitHub repository URL: ").strip()
 
-    plan = create_deployment_plan(sample_report)
+    print("\n--- Inspecting repository ---\n")
+
+    inspection_report = inspect_github_repository.invoke({
+        "github_url": github_url
+    })
+
+    print("Repository:", inspection_report["repository"])
+    print("Detected manifests:", inspection_report["manifests"])
+
+    print("\n--- Generating deployment plan ---\n")
+
+    plan = create_deployment_plan(inspection_report)
+
     print(plan.model_dump_json(indent=2))
