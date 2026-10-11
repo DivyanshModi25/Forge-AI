@@ -8,6 +8,8 @@ dependencies = [
     "fastapi>=0.143.0",
     "gitpython>=3.2.0",
     "langchain>=1.4.4",
+    "langchain-ollama>=1.1.0",
+    "langchain-openai>=1.7.0",
     "langgraph>=1.2.14",
     "pydantic>=2.14.0",
     "python-dotenv>=1.2.4",
@@ -18,6 +20,6 @@ dependencies = [
 [project.scripts]
 forge-ai-orchestrator = "forge_ai_orchestrator:main"
 
-[build-system]
-requires = ["uv_build>=0.13.0,<0.14.0"]
-build-backend = "uv_build"
+[dependency-groups]
+dev = []
+

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.tools.langchain_tools import inspect_github_repository
 
 app = FastAPI(
     title="Forge API",
@@ -19,3 +20,8 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+
+print(inspect_github_repository.name)
+print(inspect_github_repository.description)
