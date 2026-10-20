@@ -1,27 +1,46 @@
-from fastapi import FastAPI
-from app.tools.langchain_tools import inspect_github_repository
+import json
 
-app = FastAPI(
-    title="Forge API",
-    description="AI-powered software engineering automation",
-    version="0.1.0",
-)
+from app.workflow.graph import deployment_graph
 
 
-@app.get("/")
-def root():
-    return {
-        "name": "Forge",
-        "status": "running",
-        "message": "Forge backend is ready",
+def main():
+    github_url = input("GitHub repository URL: ").strip()
+
+    input_state = {
+        "github_url": github_url,
+        "image_tag": "forge-managed-app:latest",
+        "container_name": "forge-managed-app",
+        "port": 8080,
     }
 
+    print("\n--- Starting Forge workflow ---\n")
 
-@app.get("/health")
-def health():
-    return {"status": "healthy"}
+    final_state = {}
+
+    for update in deployment_graph.stream(
+        input_state,
+        stream_mode="updates",
+    ):
+        for node_name, node_update in update.items():
+            print(f"\n--- Node: {node_name} ---")
+            print(json.dumps(node_update, indent=2, default=str))
+
+            final_state.update(node_update)
+
+    print("\n--- Execution result ---")
+    print("Status:", final_state.get("status", "unknown"))
+    print("Error:", final_state.get("error"))
+
+    print(
+        "Build:",
+        json.dumps(final_state.get("build_result"), indent=2, default=str),
+    )
+
+    print(
+        "Health:",
+        json.dumps(final_state.get("health_result"), indent=2, default=str),
+    )
 
 
-
-print(inspect_github_repository.name)
-print(inspect_github_repository.description)
+if __name__ == "__main__":
+    main()
